@@ -6,6 +6,7 @@
 #else
 #include <windows.h>
 #endif
+
 #if _MSVC_LANG >= 201103L
 class CPykMgr
 {

@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <stdarg.h> 
-#include "PykStrMgr.h"
+#include "PykMgr.h"
 
 class CPykStrTrait
 {
