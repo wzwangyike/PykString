@@ -109,6 +109,8 @@ public:
 	}
 };
 
+class CPykStrMgr;
+
 template <class _Type, class _Trait>
 class CPykStringT
 {
@@ -121,7 +123,7 @@ public:
 	{
 		if (!pString)
 		{
- 			return;
+			return;
 		}
 		unsigned int nLen = _Trait::GetLength(pString);
 
@@ -130,7 +132,7 @@ public:
 		memcpy_s(m_pData, m_nLen * sizeof(_Type), pString, nLen * sizeof(_Type));
 	}
 
-	CPykStringT(CPykMgr mgr) : CPykStringT((const _Type *)mgr) {}
+	CPykStringT(CPykStrMgr mgr) : CPykStringT((const _Type *)mgr) {}
 
 	CPykStringT(const CPykStringT &s) : CPykStringT(s.m_pData) {}
 
@@ -182,7 +184,12 @@ public:
 		return false;
 	}
 
-	bool operator ==(CPykMgr mgr) const
+	bool operator ==(const CPykStringT &str) const
+	{
+		return operator ==((const _Type *)str);
+	}
+
+	bool operator ==(CPykStrMgr mgr) const
 	{
 		return operator ==((const _Type *)mgr);
 	}
@@ -224,7 +231,12 @@ public:
 		return *this;
 	}
 
-	CPykStringT &operator =(CPykMgr mgr)
+	CPykStringT &operator =(const CPykStringT &str)
+	{
+		return operator =((const _Type *)str.m_pData);
+	}
+
+	CPykStringT &operator =(CPykStrMgr mgr)
 	{
 		return operator =((const _Type *)mgr);
 	}
@@ -247,7 +259,12 @@ public:
 		return *this;
 	}
 
-	CPykStringT &operator +=(CPykMgr mgr)
+	CPykStringT &operator +=(const CPykStringT &str)
+	{
+		return *this += (const _Type *)str;
+	}
+
+	CPykStringT &operator +=(CPykStrMgr mgr)
 	{
 		return *this += (const _Type *)mgr;
 	}
@@ -346,12 +363,22 @@ public:
 		return _Trait::CompareNoCase(m_pData, pString);
 	}
 
-	int Compare(CPykMgr mgr) const
+	int Compare(const CPykStringT &str) const
+	{
+		return Compare((const _Type *)str);
+	}
+
+	int CompareNoCase(const CPykStringT &str) const
+	{
+		return CompareNoCase((const _Type *)str);
+	}
+
+	int Compare(CPykStrMgr mgr) const
 	{
 		return Compare((const _Type *)mgr);
 	}
 
-	int CompareNoCase(CPykMgr mgr) const
+	int CompareNoCase(CPykStrMgr mgr) const
 	{
 		return CompareNoCase((const _Type *)mgr);
 	}
@@ -508,7 +535,7 @@ public:
 		return((pFind == NULL) ? -1 : int(pFind - m_pData));
 	}
 
-	int Find(_In_ const _Type *pStr, _In_ unsigned int iStart = 0) const
+	int Find(_In_ _Type *pStr, _In_ unsigned int iStart = 0) const
 	{
 		unsigned int nLength = GetLength();
 		if (!pStr ||
@@ -520,7 +547,12 @@ public:
 		return((pFind == NULL) ? -1 : int(pFind - m_pData));
 	}
 
-	int Find(_In_ CPykMgr mgr, _In_ unsigned int iStart = 0) const
+	int Find(_In_ const CPykStringT &Str, _In_ unsigned int iStart = 0) const
+	{
+		return Find(Str.m_pData, iStart);
+	}
+
+	int Find(_In_ CPykStrMgr mgr, _In_ unsigned int iStart = 0) const
 	{
 		return Find((const _Type *)mgr, iStart);
 	}
@@ -599,7 +631,12 @@ public:
 		return nCount;
 	}
 
-	unsigned int Replace(CPykMgr mgrOld, CPykMgr mgrNew)
+	unsigned int Replace(const CPykStringT &strOld, const CPykStringT &strNew)
+	{
+		return Replace((const _Type *)strOld, (const _Type *)strNew);
+	}
+
+	unsigned int Replace(CPykStrMgr mgrOld, CPykStrMgr mgrNew)
 	{
 		return Replace((const _Type *)mgrOld, (const _Type *)mgrNew);
 	}
@@ -706,3 +743,11 @@ typedef CPykStringW CPykString;
 #else
 typedef CPykStringA CPykString;
 #endif
+
+class CPykStrMgr : public CPykMgr
+{
+public:
+	using CPykMgr::CPykMgr;
+	CPykStrMgr(const CPykStringA& str) : CPykStrMgr((const char *)str){}
+	CPykStrMgr(const CPykStringW& str) : CPykStrMgr((const wchar_t *)str) {}
+};
