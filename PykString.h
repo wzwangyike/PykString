@@ -117,10 +117,12 @@ class CPykStringT
 public:
 	CPykStringT()
 	{
+		memset(m_pNuil, 0, sizeof(m_pNuil));
 	}
 
 	CPykStringT(const _Type *pString, unsigned int nInitLen = -1)
 	{
+		memset(m_pNuil, 0, sizeof(m_pNuil));
 		if (!pString)
 		{
 			return;
@@ -138,6 +140,7 @@ public:
 
 	CPykStringT(CPykStringT &&s)
 	{
+		memset(m_pNuil, 0, sizeof(m_pNuil));
 		if (0 == s.m_nLen)
 		{
 			return;
@@ -153,7 +156,6 @@ public:
 		if (m_pData != m_pNuil)
 		{
 			delete[]m_pData;
-			//g_MemManager.Free(m_pData);
 			m_pData = nullptr;
 		}
 	}
@@ -702,7 +704,7 @@ public:
 	}
 
 private:
-	_Type m_pNuil[2] = { 0 };
+	_Type m_pNuil[2];
 	_Type *m_pData = m_pNuil;
 	unsigned int m_nLen = 0;
 
@@ -747,7 +749,8 @@ typedef CPykStringA CPykString;
 class CPykStrMgr : public CPykMgr
 {
 public:
-	using CPykMgr::CPykMgr;
-	CPykStrMgr(const CPykStringA& str) : CPykStrMgr((const char *)str){}
-	CPykStrMgr(const CPykStringW& str) : CPykStrMgr((const wchar_t *)str) {}
+	CPykStrMgr(const char *pStr) : CPykMgr(pStr){}
+	CPykStrMgr(const wchar_t *pStr) : CPykMgr(pStr){}
+	CPykStrMgr(const CPykStringA& str) : CPykMgr((const char *)str){}
+	CPykStrMgr(const CPykStringW& str) : CPykMgr((const wchar_t *)str) {}
 };

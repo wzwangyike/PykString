@@ -1,13 +1,17 @@
 #pragma once
 
-#if _MSVC_LANG >= 201103L
+#if _MSC_VER >= 1800
+#define USE_C11
+#endif
+
+#ifdef USE_C11
 #include <codecvt>
 #include <locale>
 #else
 #include <windows.h>
 #endif
 
-#if _MSVC_LANG >= 201103L
+#ifdef USE_C11
 class CPykMgr
 {
 public:
