@@ -3,7 +3,6 @@
 #include <memory>
 #include <stdarg.h> 
 #include "PykMgr.h"
-
 class CPykStrTrait
 {
 public:
@@ -117,23 +116,16 @@ class CPykStringT
 public:
 	CPykStringT()
 	{
+		m_pData = m_pNuil;
+		m_nLen = 0;
 		memset(m_pNuil, 0, sizeof(m_pNuil));
 	}
 
 	CPykStringT(const _Type *pString, unsigned int nInitLen = -1)
 	{
-		memset(m_pNuil, 0, sizeof(m_pNuil));
-		if (!pString)
-		{
-			return;
-		}
-		unsigned int nLen = _Trait::GetLength(pString);
-
-		nLen = (nInitLen > nLen) ? nLen : nInitLen;
-		Resize(nLen);
-		memcpy_s(m_pData, m_nLen * sizeof(_Type), pString, nLen * sizeof(_Type));
+		InitByStr(pString, nInitLen);
 	}
-
+#ifdef USE_C11
 	CPykStringT(CPykStrMgr mgr) : CPykStringT((const _Type *)mgr) {}
 
 	CPykStringT(const CPykStringT &s) : CPykStringT(s.m_pData) {}
@@ -150,13 +142,23 @@ public:
 		s.m_pData = s.m_pNuil;
 		s.m_nLen = 0;
 	}
+#else
+	CPykStringT(CPykStrMgr mgr)
+	{
+		InitByStr((const _Type *)mgr);
+	}
+	CPykStringT(const CPykStringT &s)
+	{
+		InitByStr(s.m_pData);
+	}
+#endif
 
 	~CPykStringT()
 	{
 		if (m_pData != m_pNuil)
 		{
 			delete[]m_pData;
-			m_pData = nullptr;
+			m_pData = NULL;
 		}
 	}
 
@@ -170,13 +172,23 @@ public:
 		return m_pData;
 	}
 
-	operator _Type() const
+	bool operator ==(const char c) const
 	{
-		return m_pData[0];
+		unsigned int nSelfLen = GetLength();
+		if (nSelfLen == 1 &&
+			m_pData[0] == c)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	bool operator ==(const _Type *pString) const
 	{
+		if (!pString)
+		{
+			return false;
+		}
 		unsigned int nSelfLen = GetLength();
 		unsigned int nOtherLen = _Trait::GetLength(pString);
 		if (nSelfLen == nOtherLen)
@@ -196,6 +208,22 @@ public:
 		return operator ==((const _Type *)mgr);
 	}
 
+	bool operator !=(const char c) const
+	{
+		return !operator ==(c);
+	}
+
+	bool operator !=(const CPykStringT &str) const
+	{
+		return !operator ==((const _Type *)str);
+	}
+
+	bool operator !=(CPykStrMgr mgr) const
+	{
+		return !operator ==((const _Type *)mgr);
+	}
+
+#ifdef USE_C11
 	CPykStringT &operator =(CPykStringT &&s)
 	{
 		if (0 == s.m_nLen)
@@ -216,7 +244,7 @@ public:
 		s.m_nLen = 0;
 		return *this;
 	}
-
+#endif
 	CPykStringT &operator =(const _Type *pString)
 	{
 		unsigned int nAddLen = _Trait::GetLength(pString);
@@ -242,7 +270,7 @@ public:
 	{
 		return operator =((const _Type *)mgr);
 	}
-
+#ifdef USE_C11
 	template <class AddType>
 	CPykStringT operator +(AddType &&pString)
 	{
@@ -250,9 +278,20 @@ public:
 		sTemp += pString;
 		return sTemp;
 	}
-
+#else
+	CPykStringT operator +(const CPykStringT &pString)
+	{
+		CPykStringT sTemp(*this);
+		sTemp += pString;
+		return sTemp;
+	}
+#endif
 	CPykStringT &operator +=(const _Type *pString)
 	{
+		if (!pString)
+		{
+			return *this;
+		}
 		unsigned int nNowLen = GetLength();
 		unsigned int nAddLen = _Trait::GetLength(pString);
 		Resize(nNowLen + nAddLen, true);
@@ -273,13 +312,31 @@ public:
 
 	CPykStringT &operator +=(int l)
 	{
-		AppendFormat(_T("%d"), l);
+		AppendFormat((const _Type *)(CPykStrMgr)("%d"), l);
+		return *this;
+	}
+
+	CPykStringT &operator +=(unsigned int l)
+	{
+		AppendFormat((const _Type *)(CPykStrMgr)("%ud"), l);
+		return *this;
+	}
+
+	CPykStringT &operator +=(long l)
+	{
+		AppendFormat((const _Type *)(CPykStrMgr)("%l"), l);
+		return *this;
+	}
+
+	CPykStringT &operator +=(unsigned long l)
+	{
+		AppendFormat((const _Type *)(CPykStrMgr)("%ul"), l);
 		return *this;
 	}
 
 	CPykStringT &operator +=(double d)
 	{
-		AppendFormat(_T("%f"), d);
+		AppendFormat((const _Type *)(CPykStrMgr)("%f"), d);
 		return *this;
 	}
 
@@ -622,7 +679,7 @@ public:
 			pFind = NULL;
 			while (pFind = _Trait::Find(pStr, pOld))
 			{
-				unsigned int nBalance = nLen - (unsigned int(pFind - m_pData) + nOldLen);
+				unsigned int nBalance = nLen - ((unsigned int)(pFind - m_pData) + nOldLen);
 				memmove_s(pFind + nNewLen, nBalance * sizeof(_Type), pFind + nOldLen, nBalance * sizeof(_Type));
 				*(pFind + nNewLen + nBalance) = '\0';
 				memcpy_s(pFind, nNewLen * sizeof(_Type), pNew, nNewLen * sizeof(_Type));
@@ -705,8 +762,8 @@ public:
 
 private:
 	_Type m_pNuil[2];
-	_Type *m_pData = m_pNuil;
-	unsigned int m_nLen = 0;
+	_Type *m_pData;
+	unsigned int m_nLen;
 
 	void Resize(unsigned int nLen, bool bRetain = false)
 	{
@@ -733,6 +790,22 @@ private:
 				memset(m_pData, 0, m_nLen * sizeof(_Type));
 			}
 		}
+	}
+
+	void InitByStr(const _Type *pString, unsigned int nInitLen = -1)
+	{
+		m_pData = m_pNuil;
+		m_nLen = 0;
+		memset(m_pNuil, 0, sizeof(m_pNuil));
+		if (!pString)
+		{
+			return;
+		}
+		unsigned int nLen = _Trait::GetLength(pString);
+
+		nLen = (nInitLen > nLen) ? nLen : nInitLen;
+		Resize(nLen);
+		memcpy_s(m_pData, m_nLen * sizeof(_Type), pString, nLen * sizeof(_Type));
 	}
 };
 

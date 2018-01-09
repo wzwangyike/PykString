@@ -98,7 +98,7 @@ public:
 			if (0 != nLen)
 			{
 				m_pwcData = new wchar_t[nLen + 1];
-				MultiByteToWideChar(936, 0, m_pcData, -1, NULL, 0);
+				MultiByteToWideChar(936, 0, m_pcData, -1, m_pwcData, nLen + 1);
 			}
 		}
 		return m_pwcData;
