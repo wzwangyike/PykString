@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+//#include <memory>
 #include <stdarg.h> 
 #include "PykMgr.h"
 class CPykStrTrait
@@ -110,6 +110,25 @@ public:
 
 class CPykStrMgr;
 
+template <class _Type>
+class CPykChar
+{
+public:
+	CPykChar(_Type *p) : m_p(p) {}
+	CPykChar & operator=(_Type c)
+	{
+		if (m_p)
+			*m_p = c;
+		return *this;
+	}
+	operator _Type() const
+	{
+		return m_p ? *m_p : '\0';
+	}
+private:
+	_Type * m_p;
+};
+
 template <class _Type, class _Trait>
 class CPykStringT
 {
@@ -172,7 +191,7 @@ public:
 		return m_pData;
 	}
 
-	bool operator ==(const char c) const
+	bool operator ==(const _Type c) const
 	{
 		unsigned int nSelfLen = GetLength();
 		if (nSelfLen == 1 &&
@@ -198,17 +217,12 @@ public:
 		return false;
 	}
 
-	bool operator ==(const CPykStringT &str) const
-	{
-		return operator ==((const _Type *)str);
-	}
-
 	bool operator ==(CPykStrMgr mgr) const
 	{
 		return operator ==((const _Type *)mgr);
 	}
 
-	bool operator !=(const char c) const
+	bool operator !=(const _Type c) const
 	{
 		return !operator ==(c);
 	}
@@ -247,7 +261,7 @@ public:
 #endif
 	CPykStringT &operator =(const _Type *pString)
 	{
-		unsigned int nAddLen = _Trait::GetLength(pString);
+		unsigned int nAddLen = pString ? _Trait::GetLength(pString) : 0;
 		if (0 == nAddLen)
 		{
 			memset(m_pData, 0, m_nLen * sizeof(_Type));
@@ -349,20 +363,20 @@ public:
 		return *this;
 	}
 
-	_Type operator[](_In_ int iChar) const
+	CPykChar<_Type> operator[](_In_ int iChar) const
 	{
 		if (iChar < 0)
 		{
 			if ((unsigned int)abs(iChar) > GetLength())
 			{
-				return '\0';
+				return NULL;
 			}
-			return m_pData[GetLength() + iChar];
+			return &m_pData[GetLength() + iChar];
 		}
 		if ((unsigned int)iChar >= GetLength())
-			return '\0';
+			return NULL;
 
-		return m_pData[iChar];
+		return &m_pData[iChar];
 	}
 
 	friend bool operator<(_In_ const CPykStringT& str1, _In_ const CPykStringT& str2)
@@ -388,6 +402,11 @@ public:
 	friend bool operator ==(_In_ const CPykStringT& str1, _In_ const CPykStringT& str2)
 	{
 		return(str1.Compare(str2) == 0);
+	}
+
+	friend bool operator !=(_In_ const CPykStringT& str1, _In_ const CPykStringT& str2)
+	{
+		return(str1.Compare(str2) != 0);
 	}
 
 	CPykStringT& MakeLower()
@@ -618,7 +637,7 @@ public:
 
 	int ReverseFind(_In_ _Type ch) const 
 	{
-		_Type* psz = _Trait::FindCharRev(m_pData, ch);
+		const _Type* psz = _Trait::FindCharRev(m_pData, ch);
 
 		return((psz == NULL) ? -1 : int(psz - m_pData));
 	}
@@ -761,6 +780,7 @@ public:
 	}
 
 private:
+
 	_Type m_pNuil[2];
 	_Type *m_pData;
 	unsigned int m_nLen;

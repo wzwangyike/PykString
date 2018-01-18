@@ -1,8 +1,10 @@
 #pragma once
 
+#ifndef USE_C11
 #if _MSC_VER >= 1800
 #define USE_C11
 #endif
+#endif // !USE_C11
 
 #ifdef USE_C11
 #include <codecvt>
@@ -12,6 +14,7 @@
 #endif
 
 #ifdef USE_C11
+// Use this class must use "setlocale" set language ��as setlocale(LC_ALL, ".936") set support chinese
 class CPykMgr
 {
 public:
@@ -34,8 +37,12 @@ public:
 	{
 		if (0 == m_strData.length() && 0 != m_wstrData.length())
 		{
+			std::locale locale("");
+			typedef std::codecvt<wchar_t, char, std::mbstate_t> converter_type;
+			const converter_type& con = std::use_facet<converter_type>(locale);
+
 			std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>>
-				converter(new std::codecvt<wchar_t, char, std::mbstate_t>("CHS"));
+				converter(&con);
 			m_strData = converter.to_bytes(m_wstrData);
 		}
 		return m_strData.c_str();
@@ -45,8 +52,12 @@ public:
 	{
 		if (0 == m_wstrData.length() && 0 != m_strData.length())
 		{
+			std::locale locale("");
+			typedef std::codecvt<wchar_t, char, std::mbstate_t> converter_type;
+			const converter_type& con = std::use_facet<converter_type>(locale);
+
 			std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>>
-				converter(new std::codecvt<wchar_t, char, std::mbstate_t>("CHS"));
+				converter(&con);
 			m_wstrData = converter.from_bytes(m_strData);
 		}
 		return m_wstrData.c_str();
