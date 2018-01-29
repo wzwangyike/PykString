@@ -1,7 +1,14 @@
 #pragma once
 
+#ifndef USE_C11
+#if _MSC_VER >= 1800
+#define USE_C11
+#endif
+#endif // !USE_C11
+
 //#include <memory>
 #include <stdarg.h> 
+#include <stdio.h>
 #include "PykMgr.h"
 class CPykStrTrait
 {
@@ -810,6 +817,7 @@ private:
 				memset(m_pData, 0, m_nLen * sizeof(_Type));
 			}
 		}
+		memset(m_pData + GetLength(), 0, (m_nLen - GetLength())* sizeof(_Type));
 	}
 
 	void InitByStr(const _Type *pString, unsigned int nInitLen = -1)
