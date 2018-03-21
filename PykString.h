@@ -24,32 +24,32 @@ public:
 		return _vscwprintf(pszFormat, args);
 	}
 
-	static int FormatInternel(char *pOut, unsigned int nLen, const char * pszFormat, va_list args)
+	static int FormatInternel(char *pOut, size_t nLen, const char * pszFormat, va_list args)
 	{
 		return vsprintf_s(pOut, nLen, pszFormat, args);
 	}
 
-	static int FormatInternel(wchar_t *pOut, unsigned int nLen, const wchar_t * pszFormat, va_list args)
+	static int FormatInternel(wchar_t *pOut, size_t nLen, const wchar_t * pszFormat, va_list args)
 	{
 		return vswprintf_s(pOut, nLen, pszFormat, args);
 	}
 
-	static int MakeLower(char *pStr, unsigned int nLen)
+	static int MakeLower(char *pStr, size_t nLen)
 	{
 		return _strlwr_s(pStr, nLen);
 	}
 
-	static int MakeLower(wchar_t *pStr, unsigned int nLen)
+	static int MakeLower(wchar_t *pStr, size_t nLen)
 	{
 		return _wcslwr_s(pStr, nLen);
 	}
 
-	static int MakeUpper(char *pStr, unsigned int nLen)
+	static int MakeUpper(char *pStr, size_t nLen)
 	{
 		return _strupr_s(pStr, nLen);
 	}
 
-	static int MakeUpper(wchar_t *pStr, unsigned int nLen)
+	static int MakeUpper(wchar_t *pStr, size_t nLen)
 	{
 		return _wcsupr_s(pStr, nLen);
 	}
@@ -74,12 +74,12 @@ public:
 		return wcsstr(pStr, pFind);
 	}
 
-	static unsigned int GetLength(const char *pStr)
+	static size_t GetLength(const char *pStr)
 	{
 		return strlen(pStr);
 	}
 
-	static unsigned int GetLength(const wchar_t *pStr)
+	static size_t GetLength(const wchar_t *pStr)
 	{
 		return wcslen(pStr);
 	}
@@ -147,7 +147,7 @@ public:
 		memset(m_pNuil, 0, sizeof(m_pNuil));
 	}
 
-	CPykStringT(const _Type *pString, unsigned int nInitLen = -1)
+	CPykStringT(const _Type *pString, size_t nInitLen = -1)
 	{
 		InitByStr(pString, nInitLen);
 	}
@@ -188,7 +188,7 @@ public:
 		}
 	}
 
-	unsigned int GetLength() const
+	size_t GetLength() const
 	{
 		return _Trait::GetLength(m_pData);
 	}
@@ -200,7 +200,7 @@ public:
 
 	bool operator ==(const _Type c) const
 	{
-		unsigned int nSelfLen = GetLength();
+		size_t nSelfLen = GetLength();
 		if (nSelfLen == 1 &&
 			m_pData[0] == c)
 		{
@@ -215,8 +215,8 @@ public:
 		{
 			return false;
 		}
-		unsigned int nSelfLen = GetLength();
-		unsigned int nOtherLen = _Trait::GetLength(pString);
+		size_t nSelfLen = GetLength();
+		size_t nOtherLen = _Trait::GetLength(pString);
 		if (nSelfLen == nOtherLen)
 		{
 			return !memcmp(m_pData, pString, nSelfLen * sizeof(_Type));
@@ -268,7 +268,7 @@ public:
 #endif
 	CPykStringT &operator =(const _Type *pString)
 	{
-		unsigned int nAddLen = pString ? _Trait::GetLength(pString) : 0;
+		size_t nAddLen = pString ? _Trait::GetLength(pString) : 0;
 		if (0 == nAddLen)
 		{
 			memset(m_pData, 0, m_nLen * sizeof(_Type));
@@ -313,8 +313,8 @@ public:
 		{
 			return *this;
 		}
-		unsigned int nNowLen = GetLength();
-		unsigned int nAddLen = _Trait::GetLength(pString);
+		size_t nNowLen = GetLength();
+		size_t nAddLen = _Trait::GetLength(pString);
 		Resize(nNowLen + nAddLen, true);
 		memcpy_s(m_pData + nNowLen, (m_nLen - nNowLen) * sizeof(_Type), pString, nAddLen * sizeof(_Type));
 
@@ -337,7 +337,7 @@ public:
 		return *this;
 	}
 
-	CPykStringT &operator +=(unsigned int l)
+	CPykStringT &operator +=(size_t l)
 	{
 		AppendFormat((const _Type *)(CPykStrMgr)("%ud"), l);
 		return *this;
@@ -363,7 +363,7 @@ public:
 
 	CPykStringT &operator +=(const char cChar)
 	{
-		unsigned int nNowLen = GetLength();
+		size_t nNowLen = GetLength();
 		Resize(nNowLen + 1, true);
 		m_pData[nNowLen] = cChar;
 
@@ -374,13 +374,13 @@ public:
 	{
 		if (iChar < 0)
 		{
-			if ((unsigned int)abs(iChar) > GetLength())
+			if ((size_t)abs(iChar) > GetLength())
 			{
 				return NULL;
 			}
 			return &m_pData[GetLength() + iChar];
 		}
-		if ((unsigned int)iChar >= GetLength())
+		if ((size_t)iChar >= GetLength())
 			return NULL;
 
 		return &m_pData[iChar];
@@ -473,7 +473,7 @@ public:
 		return m_pData;
 	}
 
-	_Type *GetBuffer(unsigned int nLen = 0)
+	_Type *GetBuffer(size_t nLen = 0)
 	{
 		if ((nLen + 1) <= m_nLen)
 		{
@@ -488,9 +488,9 @@ public:
 		nNewLength;
 	}
 
-	CPykStringT Left(_In_ unsigned int nCount) const
+	CPykStringT Left(_In_ size_t nCount) const
 	{
-		unsigned int nLength = GetLength();
+		size_t nLength = GetLength();
 		if (nCount >= nLength)
 		{
 			return(*this);
@@ -499,9 +499,9 @@ public:
 		return(CPykStringT(m_pData, nCount));
 	}
 
-	CPykStringT Right(_In_ unsigned int nCount) const
+	CPykStringT Right(_In_ size_t nCount) const
 	{
-		unsigned int nLength = GetLength();
+		size_t nLength = GetLength();
 		if (nCount >= nLength)
 		{
 			return(*this);
@@ -510,12 +510,12 @@ public:
 		return(CPykStringT(m_pData + nLength - nCount, nCount));
 	}
 
-	CPykStringT Mid(_In_ unsigned int iFirst) const
+	CPykStringT Mid(_In_ size_t iFirst) const
 	{
 		return Mid(iFirst, GetLength() - iFirst);
 	}
 
-	CPykStringT Mid(_In_ unsigned int iFirst, _In_ unsigned int nCount) const
+	CPykStringT Mid(_In_ size_t iFirst, _In_ size_t nCount) const
 	{
 		if (iFirst + nCount > GetLength())
 		{
@@ -609,9 +609,9 @@ public:
 		va_end(argList);
 	}
 
-	int Find(_In_ const _Type cChar, _In_ unsigned int iStart = 0) const
+	int Find(_In_ const _Type cChar, _In_ size_t iStart = 0) const
 	{
-		unsigned int nLength = GetLength();
+		size_t nLength = GetLength();
 		if (iStart >= nLength)
 		{
 			return -1;
@@ -620,9 +620,9 @@ public:
 		return((pFind == NULL) ? -1 : int(pFind - m_pData));
 	}
 
-	int Find(_In_ _Type *pStr, _In_ unsigned int iStart = 0) const
+	int Find(_In_ _Type *pStr, _In_ size_t iStart = 0) const
 	{
-		unsigned int nLength = GetLength();
+		size_t nLength = GetLength();
 		if (!pStr ||
 			iStart >= nLength)
 		{
@@ -632,12 +632,12 @@ public:
 		return((pFind == NULL) ? -1 : int(pFind - m_pData));
 	}
 
-	int Find(_In_ const CPykStringT &Str, _In_ unsigned int iStart = 0) const
+	int Find(_In_ const CPykStringT &Str, _In_ size_t iStart = 0) const
 	{
 		return Find(Str.m_pData, iStart);
 	}
 
-	int Find(_In_ CPykStrMgr mgr, _In_ unsigned int iStart = 0) const
+	int Find(_In_ CPykStrMgr mgr, _In_ size_t iStart = 0) const
 	{
 		return Find((const _Type *)mgr, iStart);
 	}
@@ -649,17 +649,17 @@ public:
 		return((psz == NULL) ? -1 : int(psz - m_pData));
 	}
 
-	unsigned int Replace(const _Type cOld, const _Type cNew)
+	size_t Replace(const _Type cOld, const _Type cNew)
 	{
-		unsigned int nCount = 0;
+		size_t nCount = 0;
 		if (cOld == cNew)
 		{
 			return nCount;
 		}
 
-		unsigned int nLen = GetLength();
+		size_t nLen = GetLength();
 		
-		for (unsigned int i = 0; i < nLen; i++)
+		for (size_t i = 0; i < nLen; i++)
 		{
 			if (m_pData[i] == cOld)
 			{
@@ -670,16 +670,16 @@ public:
 		return nCount;
 	}
 
-	unsigned int Replace(const _Type *pOld, const _Type *pNew)
+	size_t Replace(const _Type *pOld, const _Type *pNew)
 	{
-		unsigned int nCount = 0;
+		size_t nCount = 0;
 		if (!pOld ||
 			!pNew)
 		{
 			return nCount;
 		}
-		unsigned int nOldLen = _Trait::GetLength(pOld);
-		unsigned int nNewLen = _Trait::GetLength(pNew);
+		size_t nOldLen = _Trait::GetLength(pOld);
+		size_t nNewLen = _Trait::GetLength(pNew);
 
 		_Type *pStr = m_pData;
 		_Type *pFind = NULL;
@@ -691,10 +691,10 @@ public:
 
 		if (nCount)
 		{
-			unsigned int nLen = GetLength();
+			size_t nLen = GetLength();
 			if (nNewLen > nOldLen)
 			{
-				unsigned int nAdd = (nNewLen - nOldLen) * nCount;
+				size_t nAdd = (nNewLen - nOldLen) * nCount;
 				if (m_nLen <= nLen + nAdd)
 				{
 					Resize(nLen + nAdd, true);
@@ -705,7 +705,7 @@ public:
 			pFind = NULL;
 			while (pFind = _Trait::Find(pStr, pOld))
 			{
-				unsigned int nBalance = nLen - ((unsigned int)(pFind - m_pData) + nOldLen);
+				size_t nBalance = nLen - ((size_t)(pFind - m_pData) + nOldLen);
 				memmove_s(pFind + nNewLen, nBalance * sizeof(_Type), pFind + nOldLen, nBalance * sizeof(_Type));
 				*(pFind + nNewLen + nBalance) = '\0';
 				memcpy_s(pFind, nNewLen * sizeof(_Type), pNew, nNewLen * sizeof(_Type));
@@ -716,12 +716,12 @@ public:
 		return nCount;
 	}
 
-	unsigned int Replace(const CPykStringT &strOld, const CPykStringT &strNew)
+	size_t Replace(const CPykStringT &strOld, const CPykStringT &strNew)
 	{
 		return Replace((const _Type *)strOld, (const _Type *)strNew);
 	}
 
-	unsigned int Replace(CPykStrMgr mgrOld, CPykStrMgr mgrNew)
+	size_t Replace(CPykStrMgr mgrOld, CPykStrMgr mgrNew)
 	{
 		return Replace((const _Type *)mgrOld, (const _Type *)mgrNew);
 	}
@@ -754,7 +754,7 @@ public:
 
 	CPykStringT& TrimRight()
 	{
-		unsigned int nLen = GetLength();
+		size_t nLen = GetLength();
 		nLen--;
 		while (' ' == m_pData[nLen])
 		{
@@ -790,9 +790,9 @@ private:
 
 	_Type m_pNuil[2];
 	_Type *m_pData;
-	unsigned int m_nLen;
+	size_t m_nLen;
 
-	void Resize(unsigned int nLen, bool bRetain = false)
+	void Resize(size_t nLen, bool bRetain = false)
 	{
 		if (m_nLen < (nLen + 1))
 		{
@@ -820,7 +820,7 @@ private:
 		memset(m_pData + GetLength(), 0, (m_nLen - GetLength())* sizeof(_Type));
 	}
 
-	void InitByStr(const _Type *pString, unsigned int nInitLen = -1)
+	void InitByStr(const _Type *pString, size_t nInitLen = -1)
 	{
 		m_pData = m_pNuil;
 		m_nLen = 0;
@@ -829,7 +829,7 @@ private:
 		{
 			return;
 		}
-		unsigned int nLen = _Trait::GetLength(pString);
+		size_t nLen = _Trait::GetLength(pString);
 
 		nLen = (nInitLen > nLen) ? nLen : nInitLen;
 		Resize(nLen);
