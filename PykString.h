@@ -159,6 +159,8 @@ public:
 	CPykStringT(CPykStringT &&s)
 	{
 		memset(m_pNuil, 0, sizeof(m_pNuil));
+		m_pData = m_pNuil;
+		m_nLen = 0;
 		if (0 == s.m_nLen)
 		{
 			return;
@@ -620,7 +622,7 @@ public:
 		return((pFind == NULL) ? -1 : int(pFind - m_pData));
 	}
 
-	int Find(_In_ _Type *pStr, _In_ size_t iStart = 0) const
+	int Find(_In_ const _Type *pStr, _In_ size_t iStart = 0) const
 	{
 		size_t nLength = GetLength();
 		if (!pStr ||
