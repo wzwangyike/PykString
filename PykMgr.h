@@ -1,10 +1,11 @@
 #pragma once
 
 #include <windows.h>
-class CPykMgr
+template <UINT nCodePage = 936>
+class CPykMgrTemplate
 {
 public:
-	CPykMgr(const char *pStr) : m_pcData(NULL), m_pwcData(NULL)
+	CPykMgrTemplate(const char *pStr) : m_pcData(NULL), m_pwcData(NULL)
 	{
 		if (pStr)
 		{
@@ -12,7 +13,7 @@ public:
 			strcpy_s(m_pcData, strlen(pStr) + 1, pStr);
 		}
 	}
-	CPykMgr(const wchar_t *pStr) : m_pcData(NULL), m_pwcData(NULL)
+	CPykMgrTemplate(const wchar_t *pStr) : m_pcData(NULL), m_pwcData(NULL)
 	{
 		if (pStr)
 		{
@@ -25,11 +26,11 @@ public:
 	{
 		if (!m_pcData && m_pwcData)
 		{
-			int nLen = WideCharToMultiByte(936, 0, m_pwcData, -1, NULL, 0, NULL, NULL);
+			int nLen = WideCharToMultiByte(nCodePage, 0, m_pwcData, -1, NULL, 0, NULL, NULL);
 			if (0 != nLen)
 			{
 				m_pcData = new char[nLen + 1];
-				WideCharToMultiByte(936, 0, m_pwcData, -1, m_pcData, nLen + 1, NULL, NULL);
+				WideCharToMultiByte(nCodePage, 0, m_pwcData, -1, m_pcData, nLen + 1, NULL, NULL);
 			}
 		}
 		return m_pcData;
@@ -39,17 +40,17 @@ public:
 	{
 		if (!m_pwcData && m_pcData)
 		{
-			int nLen = MultiByteToWideChar(936, 0, m_pcData, -1, NULL, 0);
+			int nLen = MultiByteToWideChar(nCodePage, 0, m_pcData, -1, NULL, 0);
 			if (0 != nLen)
 			{
 				m_pwcData = new wchar_t[nLen + 1];
-				MultiByteToWideChar(936, 0, m_pcData, -1, m_pwcData, nLen + 1);
+				MultiByteToWideChar(nCodePage, 0, m_pcData, -1, m_pwcData, nLen + 1);
 			}
 		}
 		return m_pwcData;
 	}
 
-	~CPykMgr()
+	~CPykMgrTemplate()
 	{
 		if (m_pcData)
 		{
@@ -64,3 +65,5 @@ private:
 	char *m_pcData;
 	wchar_t *m_pwcData;
 };
+
+using CPykMgr = CPykMgrTemplate<>;
