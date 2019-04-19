@@ -295,14 +295,14 @@ public:
 	}
 #ifdef USE_C11
 	template <class AddType>
-	CPykStringT operator +(AddType &&pString)
+	CPykStringT operator +(AddType &&pString) const
 	{
 		CPykStringT sTemp(*this);
 		sTemp += pString;
 		return sTemp;
 	}
 #else
-	CPykStringT operator +(const CPykStringT &pString)
+	CPykStringT operator +(const CPykStringT &pString) const
 	{
 		CPykStringT sTemp(*this);
 		sTemp += pString;
@@ -485,7 +485,7 @@ public:
 		return m_pData;
 	}
 
-	void ReleaseBuffer(_In_ int nNewLength = -1)
+	void ReleaseBuffer(_In_ int nNewLength = -1) const
 	{
 		nNewLength;
 	}
@@ -685,7 +685,7 @@ public:
 
 		_Type *pStr = m_pData;
 		_Type *pFind = NULL;
-		while (pFind = _Trait::Find(pStr, pOld))
+		while (pFind = _Trait::Find(pStr, pOld), pFind)
 		{
 			nCount++;
 			pStr = pFind + nOldLen;
@@ -705,7 +705,7 @@ public:
 
 			pStr = m_pData;
 			pFind = NULL;
-			while (pFind = _Trait::Find(pStr, pOld))
+			while (pFind = _Trait::Find(pStr, pOld), pFind)
 			{
 				size_t nBalance = nLen - ((size_t)(pFind - m_pData) + nOldLen);
 				memmove_s(pFind + nNewLen, nBalance * sizeof(_Type), pFind + nOldLen, nBalance * sizeof(_Type));
@@ -831,11 +831,13 @@ private:
 		{
 			return;
 		}
-		size_t nLen = _Trait::GetLength(pString);
-
-		nLen = (nInitLen > nLen) ? nLen : nInitLen;
-		Resize(nLen);
-		memcpy_s(m_pData, m_nLen * sizeof(_Type), pString, nLen * sizeof(_Type));
+		if (nInitLen == -1)
+		{
+			nInitLen = _Trait::GetLength(pString);
+		}
+		
+		Resize(nInitLen);
+		memcpy_s(m_pData, m_nLen * sizeof(_Type), pString, nInitLen * sizeof(_Type));
 	}
 };
 
