@@ -22,6 +22,23 @@ public:
 		}
 	}
 
+	CPykMgrTemplate(const char* pStr, const char *pEnd) : m_pcData(NULL), m_pwcData(NULL)
+	{
+		if (pStr && pEnd)
+		{
+			m_pcData = new char[pEnd - pStr + 1];
+			strncpy_s(m_pcData, pEnd - pStr + 1, pStr, pEnd - pStr);
+		}
+	}
+	CPykMgrTemplate(const wchar_t* pStr, const wchar_t *pEnd) : m_pcData(NULL), m_pwcData(NULL)
+	{
+		if (pStr)
+		{
+			m_pwcData = new wchar_t[pEnd - pStr + 1];
+			wcsncpy_s(m_pwcData, pEnd - pStr + 1, pStr, pEnd - pStr);
+		}
+	}
+
 	operator const char*()
 	{
 		if (!m_pcData && m_pwcData)
