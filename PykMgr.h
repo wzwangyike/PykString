@@ -38,6 +38,7 @@ public:
 			wcsncpy_s(m_pwcData, pEnd - pStr + 1, pStr, pEnd - pStr);
 		}
 	}
+	CPykMgrTemplate(const CPykMgrTemplate&) = delete;
 
 	operator const char*()
 	{
