@@ -363,7 +363,7 @@ public:
 		return *this;
 	}
 
-	CPykStringT &operator +=(const char cChar)
+	CPykStringT& operator +=(_Type cChar)
 	{
 		size_t nNowLen = GetLength();
 		Resize(nNowLen + 1, true);
@@ -548,7 +548,7 @@ public:
 		return GetLength() == 0;
 	}
 
-	int GetAllocLength() const
+	size_t GetAllocLength() const
 	{
 		return m_nLen;
 	}
@@ -728,19 +728,19 @@ public:
 		return Replace((const _Type *)mgrOld, (const _Type *)mgrNew);
 	}
 
-	int Insert(_In_ int iIndex, _In_z_ _Type* psz)
+	size_t Insert(_In_ size_t iIndex, _In_z_ _Type* psz)
 	{
 		if (iIndex < 0)
 			iIndex = 0;
 
-		int nLength = GetLength();
+		size_t nLength = GetLength();
 
 		if (iIndex > nLength)
 		{
 			iIndex = nLength;
 		}
 		
-		int nInsertLength = psz ? _Trait::GetLength(psz) : 0;
+		size_t nInsertLength = psz ? _Trait::GetLength(psz) : 0;
 		
 		if (nInsertLength > 0)
 		{
