@@ -363,11 +363,20 @@ public:
 		return *this;
 	}
 
-	CPykStringT& operator +=(_Type cChar)
+	CPykStringT& operator +=(char cChar)
 	{
 		size_t nNowLen = GetLength();
 		Resize(nNowLen + 1, true);
 		m_pData[nNowLen] = cChar;
+
+		return *this;
+	}
+
+	CPykStringT& operator +=(wchar_t cChar)
+	{
+		size_t nNowLen = GetLength();
+		Resize(nNowLen + 1, true);
+		m_pData[nNowLen] = (_Type)cChar;
 
 		return *this;
 	}
