@@ -595,7 +595,7 @@ public:
 		if (!pszFormat)
 			return;
 
-		int nCurrentLength = GetLength();
+		size_t nCurrentLength = GetLength();
 		int nAppendLength = _Trait::GetFormattedLength(pszFormat, args);
 		if (nAppendLength < 0)
 		{
@@ -766,11 +766,17 @@ public:
 	CPykStringT& TrimRight()
 	{
 		size_t nLen = GetLength();
-		nLen--;
-		while (' ' == m_pData[nLen])
+		while (0 != nLen)
 		{
-			m_pData[nLen] = '\0';
 			nLen--;
+			if (' ' == m_pData[nLen])
+			{
+				m_pData[nLen] = '\0';
+			}
+			else
+			{
+				break;
+			}
 		}
 		return(*this);
 	}
